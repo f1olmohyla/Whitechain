@@ -1,80 +1,81 @@
-Whitechain
-Введення
-Дане тестове завдання було підготовлено компанією WhiteBIT для студентів
-університету НаУКМА. Це завдання дає змогу компанії оцінити аналітичні,
-технічні та архітектурні навички кандидатів.
-Вимоги до коду
-Код має бути виконаний на версії Solidity = 0.8.24, також він має бути
-задеплоєний і верифікований у мережу Whitechain Testnet.
-Має бути 100% покриття тестами свого контракту, і задеплоєно за
-допомогою Hardhat або Foundry, скрипти мають бути написані на TypeScript. 
-Коментарі до коду мають відповідати формату natSpec. 
-Має бути доданий README файл з адресами задеплоєних контрактів, на ньому мають бути
-виконані крафт речей, і всі інструкції для того, щоб задеплоїти проєкт. 
-Посилання на pull request викласти на Distedu.
-Використання таких бібліотек є необов’язковим, та за
-бажанням студента:
-UUPSUpgradeable
-Initializable
-AccessControl
-Та й інші
-Завдання: Гра “Козацький бізнес”
-У грі існує 6 базових ресурсів NFT1155:
-• Дерево (Wood)
-• Залізо (Iron)
-• Золото (Gold)
-• Шкіра (Leather)
-• Камінь (Stone)
-• Алмаз (Diamond)
-Гравці можуть об’єднувати ресурси та створювати унікальні предмети NFT721:
-1. Шабля козака
-• 3× Залізо
-• 1× Дерево
-• 1× Шкіра
-2. Посох старійшини
-• 2× Дерево
-• 1× Золото
-• 1× Алмаз
-3. Броня характерника (не обовʼязково)
-• 4× Шкіра
-• 2× Залізо
-• 1× Золото
-4. Бойовий браслет (не обовʼязково)
-• 4× Залізо
-• 2× Золото
-• 2× Алмаз
-Механіка NFT-1155 / NFT721:
-Створення NFT можливе лише через контракти Crafting або Search.
-Пряме створення або спалення NFT через базові контракти ResourceNFT1155 та
-ItemNFT721 — заборонене.
-Спалення NFT можливе тільки під час продажу предметів у контракті Marketplace.
-Механіка MagicToken (ERC20):
-Токени MagicToken можна отримати лише через продаж предметів у контракті
-Marketplace.
-Пряме мінтинг токенів через контракт MagicToken заборонений. Мінт викликається
-виключно з Marketplace.
-Отримані MagicToken надходять на гаманець гравця після успішного продажу
-предмета.
-Механіка Crafting / Search:
-Гравець може запускати пошук ресурсів раз на 60 секунд.
-Пошук генерує 3 випадкових ресурси (ResourceNFT1155), які надходять на
-гаманець гравця.
-Для створення предмета (ItemNFT721) через крафт, гравець повинен мати
-необхідну кількість ресурсів.
-Під час крафту:
-Ресурси спалюються.
-Створюється предмет (NFT721) з унікальним ID.
-Створені предмети можна:
-продавати на Marketplace,
-або передавати іншим гравцям.
-Механіка Marketplace:
-Гравці можуть продавати предмети (NFT721) за MagicToken.
-Після купівлі предмета:
-NFT спалюється.
-Продавець отримує відповідну кількість MagicToken на свій гаманець.
-Контракти:
-ResourceNFT1155
-ItemNFT721 (2-4шт)
-Crafting/Search
-Marketplace
-MagicToken (ERC20)
+## Cossacks Business — Whitechain Testnet
+
+Smart‑контракти гри з механіками: ERC1155 ресурси, ERC721 предмети, Crafting/Search, Marketplace та MagicToken (ERC20). Версія Solidity: 0.8.24. Скрипти деплою — TypeScript (Hardhat).
+
+### Контракти
+- `contracts/ResourceNFT1155.sol` — базові ресурси ERC1155 (Wood, Iron, Gold, Leather, Stone, Diamond). Прямий мінт/спалення заборонені; лише ролі MINTER/BURNER (контракт Crafting/Search).
+- `contracts/items/*` — предмети ERC721: `CossackSabre`, `ElderStaff`, `CharacternykArmor`, `BattleBracelet`. Мінт лише від Crafting/Search; спалення лише з Marketplace.
+- `contracts/CraftingSearch.sol` — пошук ресурсів (1 раз на 60 с, 3 випадкових ресурси) та крафт 2 обов’язкових і 2 опціональних предметів (ресурси спалюються, предмет мінтиться).
+- `contracts/MagicToken.sol` — ERC20, мінт виключно з `Marketplace`.
+- `contracts/Marketplace.sol` — продаж предметів за MagicToken: контракт переводить NFT на себе, спалює і мінтить MagicToken продавцю за фіксованою винагородою.
+
+### Вимоги
+- Node.js 20+
+- NPM/Yarn/Pnpm
+
+### Встановлення
+```bash
+npm install
+```
+
+### Налаштування середовища
+Створіть `.env` з параметрами (див. `env.example`):
+```
+PRIVATE_KEY=0x...
+WHITECHAIN_RPC_URL=...
+WHITECHAIN_CHAIN_ID=...
+WHITECHAIN_EXPLORER_API_KEY=...
+WHITECHAIN_EXPLORER_API_URL=...
+WHITECHAIN_EXPLORER_BROWSER_URL=...`
+
+Примітка щодо Whitechain Testnet: заповніть `WHITECHAIN_RPC_URL`, `WHITECHAIN_CHAIN_ID` та пари `WHITECHAIN_EXPLORER_*` відповідно до актуальних даних мережі/експлорера. Верифікація працює через Etherscan‑сумісний API.
+```
+### Компіляція
+```bash
+npm run build
+```
+
+### Тести (100% coverage)
+```bash
+npm test
+npm run coverage
+```
+
+### Деплой у Whitechain Testnet
+```bash
+npm run deploy:whitechainTestnet
+```
+Після деплою адреси буде збережено у `deployments/whitechainTestnet.json`.
+
+### Верифікація
+Скрипт деплою автоматично намагається верифікувати контракти, якщо налаштований експлорер. За потреби можна повторити вручну:
+```bash
+npx hardhat verify --network whitechainTestnet <ADDRESS> <constructor args>
+```
+
+### Використання (з консолі Hardhat)
+- Пошук ресурсів: `CraftingSearch.search()` — раз на 60 секунд, видає 3 випадкових ресурси.
+- Крафт:
+  - `craftCossackSabre()` — 3× Iron, 1× Wood, 1× Leather
+  - `craftElderStaff()` — 2× Wood, 1× Gold, 1× Diamond
+  - `craftCharacternykArmor()` — 4× Leather, 2× Iron, 1× Gold (опц.)
+  - `craftBattleBracelet()` — 4× Iron, 2× Gold, 2× Diamond (опц.)
+- Продаж предмета: дайте `approve` для `Marketplace`, викличте `Marketplace.sell(<itemAddress>, <tokenId>)`. Предмет переводиться на `Marketplace`, спалюється, а продавець отримує `MagicToken` згідно винагороди.
+
+### Особливості безпеки та доступу
+- Прямий мінт/спалення у `ResourceNFT1155` і `Item721` заборонені — лише ролі.
+- Мінт `MagicToken` можливий лише з `Marketplace`.
+- Спалення предметів відбувається тільки під час продажу у `Marketplace`.
+
+### Задеплоєні адреси
+- Додайте сюди після деплою (або див. `deployments/whitechainTestnet.json`):
+  - `ResourceNFT1155`: ...
+  - `CossackSabre`: ...
+  - `ElderStaff`: ...
+  - `CharacternykArmor`: ...
+  - `BattleBracelet`: ...
+  - `MagicToken`: ...
+  - `Marketplace`: ...
+  - `CraftingSearch`: ...
+
+
